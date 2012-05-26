@@ -23,6 +23,12 @@ describe PDFKit do
       pdfkit.source.to_s.should == file_path
     end
 
+    it "should accept an Array as the source" do
+      file_path = File.join(SPEC_ROOT,'fixtures','example.html')
+      pdfkit = PDFKit.new([])
+      pdfkit.source.should be_document_objects
+    end
+
     it "should parse the options into a cmd line friedly format" do
       pdfkit = PDFKit.new('html', :page_size => 'Letter')
       pdfkit.options.should have_key('--page-size')
@@ -84,6 +90,11 @@ describe PDFKit do
       file_path = File.join(SPEC_ROOT,'fixtures','example.html')
       pdfkit = PDFKit.new(File.new(file_path))
       pdfkit.command[-2..-1].should == [%Q{"#{file_path}"}, '"-"']
+    end
+
+    it "should specify the document objects" do
+      pdfkit = PDFKit.new([{:cover => "cover.txt"}, {:page => "http://google.com"}])
+      pdfkit.command[-5..-2].should == ['"cover"', '"cover.txt"', '"page"', '"http://google.com"']
     end
 
     it "should specify the path for the ouput if a apth is given" do

@@ -17,13 +17,13 @@ class PDFKit
   attr_accessor :source, :stylesheets
   attr_reader :options
 
-  def initialize(url_file_or_html, options = {})
-    @source = Source.new(url_file_or_html)
+  def initialize(source, options = {})
+    @source = Source.new(source)
 
     @stylesheets = []
 
     @options = PDFKit.configuration.default_options.merge(options)
-    @options.merge! find_options_in_meta(url_file_or_html) unless source.url?
+    @options.merge! find_options_in_meta(source) if @source.file? || @source.html?
     @options = normalize_options(@options)
 
     raise NoExecutableError.new unless File.exists?(PDFKit.configuration.wkhtmltopdf)
@@ -37,7 +37,7 @@ class PDFKit
     if @source.html?
       args << '-' # Get HTML from stdin
     else
-      args << @source.to_s
+      args += @source.to_args
     end
 
     args << (path || '-') # Write to file or stdout
